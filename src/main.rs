@@ -14,21 +14,25 @@ async fn main() -> Result<()> {
     pretty_env_logger::init();
 
     // Open printer
-    let mut mp = printer::Printer::open("/dev/usb/lp0").await?;
+    let mut matrixprinter = printer::Printer::open("/dev/usb/lp0").await?;
 
     // Initialize saftblandare
-    let mut sf = light::Light::init(23).await?;
+    let mut saftblandare = light::Light::init(23).await?;
 
     // Connect to backend
     let (mut c, mut rx) =
         conn::Connection::new("wss://mch.anderstorpsfestivalen.se/kernel/pipe").await?;
-
     c.connect().await.unwrap();
 
+    // Forever ?
     while let Some(i) = rx.recv().await {
-        dbg!(&i);
-        sf.alert(tokio::time::Duration::from_secs(4)).await;
-        mp.print(i).await?;
+        // Spin saftblandare for 4 secs
+        saftblandare
+            .alert(tokio::time::Duration::from_secs(4))
+            .await;
+
+        // Send the message the the printer
+        matrixprinter.print(i).await?;
     }
 
     Ok(())
