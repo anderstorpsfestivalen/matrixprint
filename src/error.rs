@@ -7,4 +7,7 @@ pub enum Error {
 
     #[error(transparent)]
     WSError(#[from] tokio_tungstenite::tungstenite::Error),
+
+    #[error(transparent)]
+    OpenPrinterError(#[from] std::io::Error),
 }
