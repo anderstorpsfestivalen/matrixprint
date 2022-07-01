@@ -22,7 +22,7 @@ async fn main() -> Result<()> {
     // Connect to backend
     let (mut c, mut rx) =
         conn::Connection::new("wss://mch.anderstorpsfestivalen.se/kernel/pipe").await?;
-    c.connect().await.unwrap();
+    c.connect().await?;
 
     // Forever ?
     while let Some(i) = rx.recv().await {
