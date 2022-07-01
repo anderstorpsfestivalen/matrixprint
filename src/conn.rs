@@ -1,5 +1,6 @@
 use crate::error::Error;
 use crate::message::Message as msg;
+use log::error;
 use url::Url;
 
 use futures_util::{future, pin_mut, StreamExt};
@@ -33,13 +34,43 @@ impl Connection {
 
         dbg!(rs);
 
-        ws_stream
-            .for_each(|message| async {
-                let data = message.unwrap().into_data();
-                tokio::io::stdout().write_all(&data).await.unwrap();
-            })
-            .await;
+        let p = self.pipe.clone();
+        tokio::spawn(Connection::process(ws_stream, p));
 
         Ok(())
+    }
+
+    async fn process(
+        ws_stream: tokio_tungstenite::WebSocketStream<
+            tokio_tungstenite::MaybeTlsStream<tokio::net::TcpStream>,
+        >,
+        input: tokio::sync::mpsc::Sender<msg>,
+    ) {
+        ws_stream
+            .for_each(|message| async {
+                let body = match message {
+                    Ok(v) => v,
+                    Err(e) => {
+                        error!("could not unpack message body: {}", e);
+                        return;
+                    }
+                };
+
+                let m: Result<msg, serde_json::Error> = serde_json::from_slice(&body.into_data());
+
+                match m {
+                    Ok(message) => match input.send(message).await {
+                        Ok(_) => {}
+                        Err(e) => {
+                            error!("could not send message to channel: {}", e);
+                        }
+                    },
+                    Err(e) => {
+                        error!("could not parse message: {}", e);
+                        return;
+                    }
+                }
+            })
+            .await;
     }
 }
