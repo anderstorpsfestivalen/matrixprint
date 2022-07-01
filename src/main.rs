@@ -6,32 +6,29 @@ mod printer;
 use pretty_env_logger;
 use std::env;
 
-use anyhow::{Context, Result};
+use anyhow::Result;
 
 #[tokio::main]
-
 async fn main() -> Result<()> {
     env::set_var("RUST_LOG", "debug");
     pretty_env_logger::init();
 
     // Open printer
-    let mut mp = printer::Printer::open("/dev/usb/lp0")
-        .await
-        .context("Printer")?;
+    let mut mp = printer::Printer::open("/dev/usb/lp0").await?;
 
     // Initialize saftblandare
+    let mut sf = light::Light::init(23).await?;
 
-    let mut sf = light::Light::init(23).await.context("GPIO")?;
-
-    let (mut c, mut rx) = conn::Connection::new("wss://mch.anderstorpsfestivalen.se/kernel/pipe")
-        .await
-        .context("Websocket")?;
+    // Connect to backend
+    let (mut c, mut rx) =
+        conn::Connection::new("wss://mch.anderstorpsfestivalen.se/kernel/pipe").await?;
 
     c.connect().await.unwrap();
 
     while let Some(i) = rx.recv().await {
         dbg!(&i);
-        mp.print(i).await;
+        sf.alert(tokio::time::Duration::from_secs(4)).await;
+        mp.print(i).await?;
     }
 
     Ok(())
