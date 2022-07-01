@@ -10,4 +10,7 @@ pub enum Error {
 
     #[error(transparent)]
     OpenPrinterError(#[from] std::io::Error),
+
+    #[error(transparent)]
+    GPIOError(#[from] rppal::gpio::Error),
 }
