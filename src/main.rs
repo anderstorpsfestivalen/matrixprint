@@ -1,5 +1,6 @@
 mod conn;
 mod error;
+mod light;
 mod message;
 mod printer;
 use pretty_env_logger;
