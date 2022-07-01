@@ -1,21 +1,22 @@
 use crate::error::Error;
-use crate::message::Message as msg;
+use crate::message::Message;
 use log::error;
 use url::Url;
 
-use futures_util::{future, pin_mut, StreamExt};
-use tokio::io::{AsyncReadExt, AsyncWriteExt};
+use futures_util::StreamExt;
 use tokio::sync::mpsc;
-use tokio_tungstenite::{connect_async, tungstenite::protocol::Message};
+use tokio_tungstenite::connect_async;
 
 pub struct Connection {
     host: Url,
 
-    pipe: tokio::sync::mpsc::Sender<msg>,
+    pipe: tokio::sync::mpsc::Sender<Message>,
 }
 
 impl Connection {
-    pub async fn new(dst: &str) -> Result<(Connection, tokio::sync::mpsc::Receiver<msg>), Error> {
+    pub async fn new(
+        dst: &str,
+    ) -> Result<(Connection, tokio::sync::mpsc::Receiver<Message>), Error> {
         let url = Url::parse(dst)?;
 
         let (tx, rx) = mpsc::channel(100);
@@ -30,9 +31,7 @@ impl Connection {
     }
 
     pub async fn connect(&mut self) -> Result<(), Error> {
-        let (ws_stream, rs) = connect_async(&self.host).await?;
-
-        dbg!(rs);
+        let (ws_stream, _) = connect_async(&self.host).await?;
 
         let p = self.pipe.clone();
         tokio::spawn(Connection::process(ws_stream, p));
@@ -44,7 +43,7 @@ impl Connection {
         ws_stream: tokio_tungstenite::WebSocketStream<
             tokio_tungstenite::MaybeTlsStream<tokio::net::TcpStream>,
         >,
-        input: tokio::sync::mpsc::Sender<msg>,
+        input: tokio::sync::mpsc::Sender<Message>,
     ) {
         ws_stream
             .for_each(|message| async {
@@ -56,7 +55,8 @@ impl Connection {
                     }
                 };
 
-                let m: Result<msg, serde_json::Error> = serde_json::from_slice(&body.into_data());
+                let m: Result<Message, serde_json::Error> =
+                    serde_json::from_slice(&body.into_data());
 
                 match m {
                     Ok(message) => match input.send(message).await {
