@@ -19,5 +19,5 @@
     ] }
     url = "2.2.2"
     rppal = "0.13.1"
-    clap = "3.2.8"
+    clap = { version = "3.2.8", features = ["derive"] }
     anyhow = "1.0.58"
