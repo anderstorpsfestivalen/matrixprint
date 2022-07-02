@@ -21,12 +21,18 @@ impl Printer {
     }
 
     pub async fn print(&mut self, msg: Message) -> Result<(), Error> {
+        //Write newline
+        self.output
+            .write_all(&[ControlCodes::LineFeed.value()])
+            .await?;
+
         self.output.write_all(b"hello, world!").await?;
 
         Ok(())
     }
 }
 
+#[allow(dead_code)]
 pub enum ControlCodes {
     Backspace,
     Cancel,
