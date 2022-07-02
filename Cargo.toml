@@ -17,3 +17,4 @@
     tokio-tungstenite = { version = "0.17.1", features = ["native-tls"] }
     url               = "2.2.2"
     rppal             = "0.13.1"
+    clap              = "3.2.8"
