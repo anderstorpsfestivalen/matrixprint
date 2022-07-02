@@ -47,7 +47,6 @@ async fn main() -> Result<()> {
 
     // Connect to backend
     let (mut c, mut rx) = conn::Connection::new(&opts.websocket).await?;
-    c.connect().await?;
 
     // Forever ?
     while let Some(i) = rx.recv().await {
