@@ -11,6 +11,7 @@ use clap::Parser;
 use log::info;
 use pretty_env_logger;
 use std::env;
+#[cfg(feature = "rpi")]
 use tokio::time::Duration;
 
 #[derive(Parser, Debug)]
