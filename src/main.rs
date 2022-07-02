@@ -25,8 +25,10 @@ struct Opts {
 }
 
 #[tokio::main]
+use anyhow::Result;
 
-async fn main() {
+#[tokio::main]
+async fn main() -> Result<()> {
     env::set_var("RUST_LOG", "debug");
     pretty_env_logger::init();
 
@@ -38,11 +40,26 @@ async fn main() {
     let (mut c, mut rx) = conn::Connection::new(&opts.websocket)
         .await
         .unwrap();
+    let mut matrixprinter = printer::Printer::open("/dev/usb/lp0").await?;
 
-    c.connect().await.unwrap();
+    // Initialize saftblandare
+    let mut saftblandare = light::Light::init(23).await?;
 
+    // Connect to backend
+    let (mut c, mut rx) =
+        conn::Connection::new("wss://mch.anderstorpsfestivalen.se/kernel/pipe").await?;
+    c.connect().await?;
+
+    // Forever ?
     while let Some(i) = rx.recv().await {
-        dbg!(&i);
-        mp.print(i).await;
+        // Spin saftblandare for 4 secs
+        saftblandare
+            .alert(tokio::time::Duration::from_secs(4))
+            .await;
+
+        // Send the message the the printer
+        matrixprinter.print(i).await?;
     }
+
+    Ok(())
 }
