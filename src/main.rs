@@ -15,7 +15,7 @@ use std::env;
 use tokio::time::Duration;
 
 #[derive(Parser, Debug)]
-//#[clap(setting = AppSettings::ColoredHelp)]
+#[clap(setting = clap::AppSettings::ColoredHelp)]
 struct Args {
     #[clap(short, long, default_value = "/dev/usb/lp0")]
     printer_path: String,
@@ -46,7 +46,7 @@ async fn main() -> Result<()> {
     let mut saftblandare = light::Light::init(opts.relaypin).await?;
 
     // Connect to backend
-    let (mut c, mut rx) = conn::Connection::new(&opts.websocket).await?;
+    let (_c, mut rx) = conn::Connection::new(&opts.websocket).await?;
 
     // Forever ?
     while let Some(i) = rx.recv().await {
