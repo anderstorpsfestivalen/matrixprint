@@ -5,8 +5,10 @@ mod message;
 mod printer;
 use anyhow::Result;
 use clap::Parser;
+use log::info;
 use pretty_env_logger;
 use std::env;
+use tokio::time::Duration;
 
 #[derive(Parser, Debug)]
 //#[clap(setting = AppSettings::ColoredHelp)]
@@ -44,10 +46,9 @@ async fn main() -> Result<()> {
 
     // Forever ?
     while let Some(i) = rx.recv().await {
+        info!("Message recieved from {}", &i.from);
         // Spin saftblandare for 4 secs
-        saftblandare
-            .alert(tokio::time::Duration::from_secs(4))
-            .await;
+        saftblandare.alert(Duration::from_secs(5)).await;
 
         // Send the message the the printer
         matrixprinter.print(i).await?;
