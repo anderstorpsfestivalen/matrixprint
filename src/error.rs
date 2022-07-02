@@ -12,5 +12,6 @@ pub enum Error {
     OpenPrinterError(#[from] std::io::Error),
 
     #[error(transparent)]
+    #[cfg(feature = "rpi")]
     GPIOError(#[from] rppal::gpio::Error),
 }

@@ -72,5 +72,6 @@ impl Connection {
                 }
             })
             .await;
+        dbg!("i am dead");
     }
 }

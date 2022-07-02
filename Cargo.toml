@@ -18,6 +18,9 @@
         "rustls-tls-native-roots",
     ] }
     url = "2.2.2"
-    rppal = "0.13.1"
+    rppal = {version = "0.13.1", optional = true }
     clap = { version = "3.2.8", features = ["derive"] }
     anyhow = "1.0.58"
+
+[features]
+    rpi = ["dep:rppal"]

@@ -1,6 +1,9 @@
 mod conn;
 mod error;
+
+#[cfg(feature = "rpi")]
 mod light;
+
 mod message;
 mod printer;
 use anyhow::Result;
@@ -38,6 +41,7 @@ async fn main() -> Result<()> {
     let mut matrixprinter = printer::Printer::open(&opts.printer_path).await?;
 
     // Initialize saftblandare
+    #[cfg(feature = "rpi")]
     let mut saftblandare = light::Light::init(opts.relaypin).await?;
 
     // Connect to backend
@@ -47,7 +51,9 @@ async fn main() -> Result<()> {
     // Forever ?
     while let Some(i) = rx.recv().await {
         info!("Message recieved from {}", &i.from);
+
         // Spin saftblandare for 4 secs
+        #[cfg(feature = "rpi")]
         saftblandare.alert(Duration::from_secs(5)).await;
 
         // Send the message the the printer
