@@ -1,14 +1,16 @@
 use crate::error::Error;
+use crate::stats::Stats;
 use crate::message::Message;
 use tokio::fs::OpenOptions;
 use tokio::io::AsyncWriteExt;
 
 pub struct Printer {
     output: tokio::fs::File,
+    stats: Option<Stats>
 }
 
 impl Printer {
-    pub async fn open(path: &str) -> Result<Printer, Error> {
+    pub async fn open(path: &str, stats: Option<Stats>) -> Result<Printer, Error> {
         let output = OpenOptions::new()
             .read(false)
             .write(true)
@@ -17,7 +19,7 @@ impl Printer {
             .open(path)
             .await?;
 
-        Ok(Printer { output })
+        Ok(Printer { output, stats })
     }
 
     pub async fn print(&mut self, msg: Message) -> Result<(), Error> {
@@ -27,6 +29,10 @@ impl Printer {
             .await?;
 
         self.output.write_all(b"hello, world!").await?;
+
+        if let Some(s) = &self.stats {
+            s.print().await?;
+        }
 
         Ok(())
     }

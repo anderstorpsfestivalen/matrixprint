@@ -21,6 +21,7 @@
     rppal = {version = "0.13.1", optional = true }
     clap = { version = "3.2.8", features = ["derive"] }
     anyhow = "1.0.58"
+    reqwest = { version = "0.11.11", features = ["rustls-tls"], default-features = false}
 
 [features]
     default = ["rpi"]

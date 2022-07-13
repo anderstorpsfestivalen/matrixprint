@@ -14,4 +14,10 @@ pub enum Error {
     #[error(transparent)]
     #[cfg(feature = "rpi")]
     GPIOError(#[from] rppal::gpio::Error),
+
+    #[error(transparent)]
+    RequestError(#[from] reqwest::Error),
+
+    #[error("No stats key specified")]
+    NoStatsKeySpecificed,
 }

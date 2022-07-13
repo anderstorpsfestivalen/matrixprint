@@ -1,5 +1,7 @@
 mod conn;
 mod error;
+mod cli;
+mod stats;
 
 #[cfg(feature = "rpi")]
 mod light;
@@ -7,39 +9,33 @@ mod light;
 mod message;
 mod printer;
 use anyhow::Result;
-use clap::Parser;
-use log::info;
+use log::{info, warn};
 use pretty_env_logger;
+use clap::Parser;
 use std::env;
 #[cfg(feature = "rpi")]
 use tokio::time::Duration;
-
-#[derive(Parser, Debug)]
-#[clap(setting = clap::AppSettings::ColoredHelp)]
-struct Args {
-    #[clap(short, long, default_value = "/dev/usb/lp0")]
-    printer_path: String,
-
-    #[clap(
-        short,
-        long,
-        default_value = "wss://mch.anderstorpsfestivalen.se/kernel/pipe"
-    )]
-    websocket: String,
-
-    #[clap(short, long, default_value = "26")]
-    relaypin: u8,
-}
 
 #[tokio::main]
 async fn main() -> Result<()> {
     env::set_var("RUST_LOG", "debug");
     pretty_env_logger::init();
 
-    let opts = Args::parse();
+    let opts = cli::Args::parse();
+    
+    // Setup stats tracking
+    let stats = stats::Stats::new(&opts.stats_url, &opts.stats_key);
+    
+    let stats = match stats {
+        Ok(v) => Some(v),
+        Err(e) => {
+            warn!("{}, disabling stats tracking", e);
+            None
+        }
+    };
 
     // Open printer
-    let mut matrixprinter = printer::Printer::open(&opts.printer_path).await?;
+    let mut matrixprinter = printer::Printer::open(&opts.printer_path, stats).await?;
 
     // Initialize saftblandare
     #[cfg(feature = "rpi")]
