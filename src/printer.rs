@@ -1,12 +1,12 @@
 use crate::error::Error;
-use crate::stats::Stats;
 use crate::message::Message;
+use crate::stats::Stats;
 use tokio::fs::OpenOptions;
 use tokio::io::AsyncWriteExt;
 
 pub struct Printer {
     output: tokio::fs::File,
-    stats: Option<Stats>
+    stats: Option<Stats>,
 }
 
 impl Printer {
@@ -28,7 +28,9 @@ impl Printer {
             .write_all(&[ControlCodes::LineFeed.value()])
             .await?;
 
-        self.output.write_all(b"hello, world!").await?;
+        let v: Vec<u8> = msg.into();
+
+        self.output.write_all(&v).await?;
 
         if let Some(s) = &self.stats {
             s.print().await?;
