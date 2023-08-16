@@ -1,3 +1,4 @@
+use crate::cc;
 use serde::{Deserialize, Serialize};
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -20,18 +21,26 @@ impl Into<Vec<u8>> for Message {
     fn into(self) -> Vec<u8> {
         let mut v = Vec::new();
         // From
+        v.extend_from_slice(&[cc::ControlCodes::Wide.into()]);
         v.extend_from_slice(b"FROM: ");
-        v.extend_from_slice(self.from.as_bytes());
+        v.extend_from_slice(&[cc::ControlCodes::ReleaseWide.into()]);
+        v.extend_from_slice(&self.from.as_bytes());
         v.extend_from_slice(b"\n");
 
+        v.extend_from_slice(&[cc::ControlCodes::Wide.into()]);
         v.extend_from_slice(b"SUBJECT: ");
-        v.extend_from_slice(self.subject.as_bytes());
+        v.extend_from_slice(&[cc::ControlCodes::ReleaseWide.into()]);
+        v.extend_from_slice(&self.subject.as_bytes());
         v.extend_from_slice(b"\n");
 
         v.extend_from_slice(b"MESSAGE: ");
         v.extend_from_slice(b"\n");
-        v.extend_from_slice(self.filtered.as_bytes());
+        v.extend_from_slice(&[cc::ControlCodes::Compressed.into()]);
+        v.extend_from_slice(&self.filtered.as_bytes());
+        v.extend_from_slice(&[cc::ControlCodes::ReleaseCompressed.into()]);
         v.extend_from_slice(b"\n");
+
+        v.extend_from_slice(&[cc::ControlCodes::FormFeed.into()]);
         v
     }
 }

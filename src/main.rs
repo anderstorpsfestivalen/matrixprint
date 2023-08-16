@@ -1,6 +1,7 @@
+mod cc;
+mod cli;
 mod conn;
 mod error;
-mod cli;
 mod stats;
 
 #[cfg(feature = "rpi")]
@@ -9,9 +10,9 @@ mod light;
 mod message;
 mod printer;
 use anyhow::Result;
+use clap::Parser;
 use log::{info, warn};
 use pretty_env_logger;
-use clap::Parser;
 use std::env;
 #[cfg(feature = "rpi")]
 use tokio::time::Duration;
@@ -22,10 +23,10 @@ async fn main() -> Result<()> {
     pretty_env_logger::init();
 
     let opts = cli::Args::parse();
-    
+
     // Setup stats tracking
     let stats = stats::Stats::new(&opts.stats_url, &opts.stats_key);
-    
+
     let stats = match stats {
         Ok(v) => Some(v),
         Err(e) => {
