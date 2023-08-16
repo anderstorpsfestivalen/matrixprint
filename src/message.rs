@@ -42,6 +42,7 @@ impl Into<Vec<u8>> for Message {
         v.extend_from_slice(&[cc::ControlCodes::CarriageReturn.into()]);
         v.extend_from_slice(&[cc::ControlCodes::CarriageReturn.into()]);
         v.extend_from_slice(&[cc::ControlCodes::CarriageReturn.into()]);
+        v.extend_from_slice(b"\n\n\n\n\n\n\n\n\n");
         v
     }
 }
