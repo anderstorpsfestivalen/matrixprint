@@ -1,1 +1,1 @@
-cross build --target aarch64-unknown-linux-gnu --release && scp ./target/aarch64-unknown-linux-gnu/release/matrixprint coral@matrixprint.local:~/mkr
+cross build --target armv7-unknown-linux-gnueabi --release && scp ./target/armv7-unknown-linux-gnueabi/release/matrixprint coral@matrixprint.local:~/mkr

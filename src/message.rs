@@ -32,15 +32,16 @@ impl Into<Vec<u8>> for Message {
         v.extend_from_slice(&[cc::ControlCodes::ReleaseWide.into()]);
         v.extend_from_slice(&self.subject.as_bytes());
         v.extend_from_slice(b"\n");
-
-        v.extend_from_slice(b"MESSAGE: ");
         v.extend_from_slice(b"\n");
+
         v.extend_from_slice(&[cc::ControlCodes::Compressed.into()]);
         v.extend_from_slice(&self.filtered.as_bytes());
         v.extend_from_slice(&[cc::ControlCodes::ReleaseCompressed.into()]);
         v.extend_from_slice(b"\n");
 
-        v.extend_from_slice(&[cc::ControlCodes::FormFeed.into()]);
+        v.extend_from_slice(&[cc::ControlCodes::CarriageReturn.into()]);
+        v.extend_from_slice(&[cc::ControlCodes::CarriageReturn.into()]);
+        v.extend_from_slice(&[cc::ControlCodes::CarriageReturn.into()]);
         v
     }
 }
