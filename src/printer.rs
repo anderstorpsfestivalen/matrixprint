@@ -30,14 +30,14 @@ impl Printer {
             .await
         {
             Ok(_) => {}
-            Err(e) => println!(e),
+            Err(e) => println!("{}", e),
         }
 
         let v: Vec<u8> = msg.into();
 
         match self.output.write_all(&v).await {
             Ok(_) => {}
-            Err(e) => println!(e),
+            Err(e) => println!("{}", e),
         }
 
         if let Some(s) = &self.stats {
