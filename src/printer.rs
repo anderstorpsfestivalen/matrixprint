@@ -24,25 +24,30 @@ impl Printer {
 
     pub async fn print(&mut self, msg: Message) -> Result<(), Error> {
         //Write newline
-        match self
-            .output
-            .write_all(&[ControlCodes::LineFeed.value()])
-            .await
-        {
-            Ok(_) => {}
-            Err(e) => println!("{}", e),
-        }
+        // match self
+        //     .output
+        //     .write_all(&[ControlCodes::LineFeed.value()])
+        //     .await
+        // {
+        //     Ok(_) => {}
+        //     Err(e) => println!("{}", e),
+        // }
+
+        // let v: Vec<u8> = msg.into();
+
+        // match self.output.write_all(&v).await {
+        //     Ok(_) => {}
+        //     Err(e) => println!("{}", e),
+        // }
+
+        // if let Some(s) = &self.stats {
+        //     //s.print().await?;
+
+        let p = printers::get_printers().first().unwrap().clone();
+        // }
 
         let v: Vec<u8> = msg.into();
-
-        match self.output.write_all(&v).await {
-            Ok(_) => {}
-            Err(e) => println!("{}", e),
-        }
-
-        if let Some(s) = &self.stats {
-            //s.print().await?;
-        }
+        p.print(&v);
 
         Ok(())
     }
