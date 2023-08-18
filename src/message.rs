@@ -34,6 +34,13 @@ impl Into<Vec<u8>> for Message {
         v.extend_from_slice(b"\n");
         v.extend_from_slice(b"\n");
 
+        v.extend_from_slice(&[cc::ControlCodes::Wide.into()]);
+        v.extend_from_slice(b"DATE: ");
+        v.extend_from_slice(&[cc::ControlCodes::ReleaseWide.into()]);
+        v.extend_from_slice(&self.date.as_bytes());
+        v.extend_from_slice(b"\n");
+        v.extend_from_slice(b"\n");
+
         v.extend_from_slice(&[cc::ControlCodes::Compressed.into()]);
         v.extend_from_slice(&self.filtered.as_bytes());
         v.extend_from_slice(&[cc::ControlCodes::ReleaseCompressed.into()]);
