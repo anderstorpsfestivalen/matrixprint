@@ -1,6 +1,8 @@
 use crate::error::Error;
 use crate::message::Message;
 use crate::stats::Stats;
+use std::io::prelude::*;
+use std::process::{Command, Stdio};
 use tokio::fs::OpenOptions;
 use tokio::io::AsyncWriteExt;
 
@@ -23,6 +25,29 @@ impl Printer {
     }
 
     pub async fn print(&mut self, msg: Message) -> Result<(), Error> {
+        let process = match Command::new("lpr")
+            .arg("-P lp")
+            .stdin(Stdio::piped())
+            .stdout(Stdio::piped())
+            .spawn()
+        {
+            Err(why) => panic!("couldn't spawn lp: {}", why),
+            Ok(process) => process,
+        };
+
+        let v: Vec<u8> = msg.into();
+
+        match process.stdin.unwrap().write_all(&v) {
+            Err(why) => panic!("couldn't write to lp stdin: {}", why),
+            Ok(_) => println!("sent pangram to wc"),
+        }
+
+        let mut s = String::new();
+        match process.stdout.unwrap().read_to_string(&mut s) {
+            Err(why) => panic!("couldn't read lp stdout: {}", why),
+            Ok(_) => print!("lp responded with:\n{}", s),
+        }
+
         //Write newline
         // match self
         //     .output
@@ -42,12 +67,6 @@ impl Printer {
 
         // if let Some(s) = &self.stats {
         //     //s.print().await?;
-
-        let p = printers::get_printers().first().unwrap().clone();
-        // }
-
-        let v: Vec<u8> = msg.into();
-        p.print(&v);
 
         Ok(())
     }
