@@ -26,7 +26,8 @@ impl Printer {
 
     pub async fn print(&mut self, msg: Message) -> Result<(), Error> {
         let process = match Command::new("lpr")
-            .arg("-P lp")
+            .arg("-P")
+            .arg("lp")
             .stdin(Stdio::piped())
             .stdout(Stdio::piped())
             .spawn()
