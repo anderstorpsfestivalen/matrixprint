@@ -24,23 +24,30 @@ impl Printer {
 
     pub async fn print(&mut self, msg: Message) -> Result<(), Error> {
         //Write newline
-        self.output
+        match self
+            .output
             .write_all(&[ControlCodes::LineFeed.value()])
-            .await?;
+            .await
+        {
+            Ok(_) => {}
+            Err(e) => println!(e),
+        }
 
         let v: Vec<u8> = msg.into();
 
-        self.output.write_all(&v).await?;
+        match self.output.write_all(&v).await {
+            Ok(_) => {}
+            Err(e) => println!(e),
+        }
 
         if let Some(s) = &self.stats {
-            s.print().await?;
+            //s.print().await?;
         }
 
         Ok(())
     }
 }
 
-#[allow(dead_code)]
 pub enum ControlCodes {
     Backspace,
     Cancel,
